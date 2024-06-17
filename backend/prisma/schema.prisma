@@ -1,0 +1,196 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+//Authorization model
+model User {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  email         String          @unique
+  password      String
+  firstname     String?
+  lastname      String?
+  roleId        String          @db.ObjectId
+  role          Role?           @relation(fields: [roleId], references: [id])
+  messages      MessageInput[]
+  createdAt     DateTime        @default(now())
+  createdBy     String?
+  updatedAt     DateTime        @updatedAt
+  updatedBy     String?
+  deletedAt     DateTime?
+  deletedBy     String?
+  MessageOutput MessageOutput[]
+  IncomeMoney   IncomeMoney[]
+  SourceIncome  SourceIncome[]
+  Prompt        Prompt[]
+}
+
+model Role {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  name          String       @unique
+  description   String?
+  users         User[]
+  createdAt     DateTime     @default(now())
+  createdBy     String?
+  updatedAt     DateTime     @updatedAt
+  updatedBy     String?
+  deletedAt     DateTime?
+  deletedBy     String?
+  permissionIDs String[]     @db.ObjectId
+  permission    Permission[] @relation(fields: [permissionIDs], references: [id])
+}
+
+model Permission {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String     @unique
+  description String?
+  functionIDs String[]   @db.ObjectId
+  function    Function[] @relation(fields: [functionIDs], references: [id])
+  createdAt   DateTime   @default(now())
+  createdBy   String?
+  updatedAt   DateTime   @updatedAt
+  updatedBy   String?
+  deletedAt   DateTime?
+  deletedBy   String?
+  roleIDs     String[]   @db.ObjectId
+  role        Role[]     @relation(fields: [roleIDs], references: [id])
+}
+
+model Function {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  name          String       @unique
+  customName    String?
+  description   String?
+  link          String?
+  status        Status       @default(ACTIVE)
+  parentId      String?      @db.ObjectId
+  parent        Function?    @relation("ParentFunction", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children      Function[]   @relation("ParentFunction")
+  permissionIDs String[]     @db.ObjectId
+  permissions   Permission[] @relation(fields: [permissionIDs], references: [id])
+  createdAt     DateTime     @default(now())
+  createdBy     String?
+  updatedAt     DateTime     @updatedAt
+  updatedBy     String?
+  deletedAt     DateTime?
+  deletedBy     String?
+}
+
+//Business model
+model MessageInput {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  message        String
+  sourceIncomeId String          @db.ObjectId
+  sourceIncome   SourceIncome    @relation(fields: [sourceIncomeId], references: [id])
+  createdAt      DateTime        @default(now())
+  createdBy      String          @db.ObjectId
+  createdUser    User            @relation(fields: [createdBy], references: [id])
+  updatedAt      DateTime        @updatedAt
+  updatedBy      String?
+  deletedAt      DateTime?
+  deletedBy      String?
+  MessageOutput  MessageOutput[]
+  IncomeMoney    IncomeMoney[]
+}
+
+model MessageOutput {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  message        String
+  messageInputId String       @db.ObjectId
+  messageInput   MessageInput @relation(fields: [messageInputId], references: [id])
+  createdAt      DateTime     @default(now())
+  createdBy      String       @db.ObjectId
+  createdUser    User         @relation(fields: [createdBy], references: [id])
+  updatedAt      DateTime     @updatedAt
+  updatedBy      String?
+  deletedAt      DateTime?
+  deletedBy      String?
+}
+
+model IncomeMoney {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  amount         Float
+  MessageInputId String?       @db.ObjectId
+  messageInput   MessageInput? @relation(fields: [MessageInputId], references: [id])
+  inputType      InputType     @default(FROM_Message)
+  spendingDate   DateTime      @default(now())
+  category       Category
+  status         Status        @default(ACTIVE)
+  description    String?
+  createdAt      DateTime      @default(now())
+  createdBy      String        @db.ObjectId
+  createdUser    User          @relation(fields: [createdBy], references: [id])
+  updatedAt      DateTime      @updatedAt
+  updatedBy      String?
+  deletedAt      DateTime?
+  deletedBy      String?
+}
+
+model SourceIncome {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  name          String         @unique //Bank name, card name, etc
+  promptId      String[]       @db.ObjectId
+  promptHandler Prompt[]       @relation(fields: [promptId], references: [id])
+  description   String?
+  createdAt     DateTime       @default(now())
+  createdBy     String         @db.ObjectId
+  createdUser   User           @relation(fields: [createdBy], references: [id])
+  updatedAt     DateTime       @updatedAt
+  updatedBy     String?
+  deletedAt     DateTime?
+  deletedBy     String?
+  MessageInput  MessageInput[]
+}
+
+model Prompt {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String         @unique
+  PrompType      PrompType
+  Regex          String?
+  SourceIncomeId String[]       @db.ObjectId
+  sourceIncome   SourceIncome[] @relation(fields: [SourceIncomeId], references: [id])
+  description    String?
+  createdAt      DateTime       @default(now())
+  createdBy      String         @db.ObjectId
+  createdUser    User           @relation(fields: [createdBy], references: [id])
+  updatedAt      DateTime       @updatedAt
+  updatedBy      String?
+  deletedAt      DateTime?
+  deletedBy      String?
+}
+
+//Enums section
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum PrompType {
+  PROMPT_1
+  PROMPT_2
+  PROMPT_3
+  PROMPT_4
+}
+
+enum InputType {
+  FROM_Message
+  FROM_Manual
+}
+
+enum Category {
+  RETAURANT
+  SHOPPING
+  ENTERTAINMENT
+  TRANSPORTATION
+  HEALTH
+  EDUCATION
+  OTHER
+}

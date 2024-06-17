@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  nest-api:
+    container_name: nest-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
+    name: mongo-data

@@ -1,12 +1,12 @@
 # compiled output
 /dist
 /node_modules
-package-lock.json
 
 # Logs
 logs
 *.log
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
@@ -34,5 +34,4 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# code testing coverage
-documentation
+.env

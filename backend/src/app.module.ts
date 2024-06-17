@@ -1,54 +1,43 @@
-import { MailerModule } from '@nestjs-modules/mailer';
-import { CacheModule, MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { join } from 'path';
-import { devConfig } from './config/dev.config';
-import { prodConfig } from './config/prod.config';
-import { CategoryModule } from './modules/category/category.module';
-import { ProductModule } from './modules/product/product.module';
-import { UsersModule } from './modules/users/users.module';
-import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
+import { PrismaModule, loggingMiddleware } from 'nestjs-prisma';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AppResolver } from './app.resolver';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { PostsModule } from './posts/posts.module';
+import config from './common/configs/config';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GqlConfigService } from './gql-config.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
+    ConfigModule.forRoot({ isGlobal: true, load: [config] }),
+    PrismaModule.forRoot({
       isGlobal: true,
-      load: [process.env.NODE_ENV == 'DEV' ? devConfig : prodConfig]
+      prismaServiceOptions: {
+        middlewares: [
+          // configure your prisma middleware
+          loggingMiddleware({
+            logger: new Logger('PrismaMiddleware'),
+            logLevel: 'log',
+          }),
+        ],
+      },
     }),
-    CacheModule.register(),
-    TypeOrmModule.forRoot({
-      type: 'mongodb',
-      host: process.env.DB_HOST,
-      database: process.env.DB_NAME,
-      entities: ['src/modules/*/**.entity{.ts,.js}'],
-      synchronize: false,
-      logger: 'advanced-console',
-      useUnifiedTopology: true,
-      autoLoadEntities: true
+
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      useClass: GqlConfigService,
     }),
-    MailerModule.forRoot({
-      transport: {
-        secure: true, // use SSL
-        auth: {},
-        template: {
-          dir: join(__dirname, '..', 'templates'), // from src not dist folder (perhaps needs to change in Prod !!!!!!!)
-          /* adapter: new HandlebarsAdapter(), // or new PugAdapter */
-          options: {
-            strict: true
-          }
-        }
-      }
-    }),
+
+    AuthModule,
     UsersModule,
-    CategoryModule,
-    ProductModule
+    PostsModule,
   ],
-  controllers: [],
-  providers: []
+  controllers: [AppController],
+  providers: [AppService, AppResolver],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
-  }
-}
+export class AppModule {}

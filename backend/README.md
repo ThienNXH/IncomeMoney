@@ -1,800 +1,481 @@
-<h1 align="center">NestJS Boilerplate</h1>
+# Instructions
 
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+Starter template for 😻 [NestJS](https://nestjs.com/) and [Prisma](https://www.prisma.io/).
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> Checkout [NestJS Prisma Schematics](https://github.com/marcjulian/nestjs-prisma) to automatically add Prisma support to your Nest application.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+## Version
 
-## Description
+| Branch                                                                                                       |  Nest | Prisma                                               |  Graphql                                                              |
+| ------------------------------------------------------------------------------------------------------------ | ----- | ---------------------------------------------------- | --------------------------------------------------------------------- |
+| main                                                                                                       | v9    | [v4](https://github.com/prisma/prisma)         | [Code-first](https://docs.nestjs.com/graphql/quick-start#code-first)  |
+| [nest-8-prisma-3](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-8-prisma-3)                                                                                                       | v8    | [v3](https://github.com/prisma/prisma)         | [Code-first](https://docs.nestjs.com/graphql/quick-start#code-first)  |
+| [nest-7](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-7)                                                                                                       | v7    | [v2](https://github.com/prisma/prisma2)         | [Code-first](https://docs.nestjs.com/graphql/quick-start#code-first)  |
+| [nest-6-prisma2-code-first](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-6-prisma2-code-first) | v6    | [v2-preview](https://github.com/prisma/prisma2) | [Code-first](https://github.com/19majkel94/type-graphql)              |
+| [nest-6-code-first](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-6-code-first)         | v6    | [v1](https://github.com/prisma/prisma)               | [Code-first](https://github.com/19majkel94/type-graphql)              |
+| [nest-6-sdl-first](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-6-sdl-first)                                                                                        | v6    | [v1](https://github.com/prisma/prisma)               | [SDL First](https://docs.nestjs.com/graphql/quick-start#schema-first) |
+| [nest-5](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-5)                     | v5    | [v1](https://github.com/prisma/prisma)               | [SDL First](https://docs.nestjs.com/graphql/quick-start#schema-first) |
 
-This is a NestJS boilerplate.
+## Features
 
-The github repository : [Github repository](https://github.com/BrahimAbdelli/nestjs-boilerplate).
+- GraphQL w/ [playground](https://github.com/prisma/graphql-playground)
+- Code-First w/ [decorators](https://docs.nestjs.com/graphql/quick-start#code-first)
+- [Prisma](https://www.prisma.io/) for database modelling, migration and type-safe access (Postgres, MySQL & MongoDB)
+- 🔐 JWT authentication w/ [passport-jwt](https://github.com/mikenicholson/passport-jwt)
+- REST API docs w/ [Swagger](https://swagger.io/)
 
-And you can find every detail about it here :
-[Article](https://brahimabdelli.com/nestjs-boilerplate).
+## Overview
 
-## Installation
+- [Instructions](#instructions)
+  - [Features](#features)
+  - [Overview](#overview)
+  - [Prisma Setup](#prisma-setup)
+    - [1. Install Dependencies](#1-install-dependencies)
+    - [2. PostgreSQL with Docker](#2-PostgreSQL-with-docker)
+    - [3. Prisma: Prisma Migrate](#3-prisma-prisma-migrate)
+    - [4. Prisma: Prisma Client JS](#4-prisma-client-js)
+    - [5. Seed the database data with this script](#5-seed-the-database-data-with-this-script)
+    - [6. Start NestJS Server](#6-start-nestjs-server)
+  - [GraphQL Playground](#graphql-playground)
+  - [Rest Api](#rest-api)
+  - [Docker](#docker)
+  - [Schema Development](#schema-development)
+  - [NestJS - Api Schema](#nestjs---api-schema)
+    - [Resolver](#resolver)
+  - [GraphQL Client](#graphql-client)
+    - [Angular](#angular)
+      - [Setup](#setup)
+      - [Queries](#queries)
+      - [Mutations](#mutations)
+      - [Subscriptions](#subscriptions)
+      - [Authentication](#authentication)
+
+## Prisma Setup
+
+### 1. Install Dependencies
+
+Install [Nestjs CLI](https://docs.nestjs.com/cli/usages) to start and [generate CRUD resources](https://trilon.io/blog/introducing-cli-generators-crud-api-in-1-minute)
 
 ```bash
-$ npm install
+# npm
+npm i -g @nestjs/cli
+# yarn
+yarn add -g @nestjs/cli
 ```
 
-## Running the app
+Install the dependencies for the Nest application:
 
 ```bash
-# development
-$ npm run start
+# npm
+npm install
+# yarn
+yarn install
+```
+
+### 2. PostgreSQL with Docker
+
+Setup a development PostgreSQL with Docker. Copy [.env.example](./.env.example) and rename to `.env` - `cp .env.example .env` - which sets the required environments for PostgreSQL such as `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_DB`. Update the variables as you wish and select a strong password.
+
+Start the PostgreSQL database
+
+```bash
+docker-compose -f docker-compose.db.yml up -d
+# or
+npm run docker:db
+```
+
+### 3. Prisma Migrate
+
+[Prisma Migrate](https://github.com/prisma/prisma2/tree/master/docs/prisma-migrate) is used to manage the schema and migration of the database. Prisma datasource requires an environment variable `DATABASE_URL` for the connection to the PostgreSQL database. Prisma reads the `DATABASE_URL` from the root [.env](./.env) file.
+
+Use Prisma Migrate in your [development environment](https://www.prisma.io/blog/prisma-migrate-preview-b5eno5g08d0b#evolving-the-schema-in-development) to
+
+1. Creates `migration.sql` file
+2. Updates Database Schema
+3. Generates Prisma Client
+
+```bash
+npx prisma migrate dev
+# or
+npm run migrate:dev
+```
+
+If you like to customize your `migration.sql` file run the following command. After making your customizations run `npx prisma migrate dev` to apply it.
+
+```bash
+npx prisma migrate dev --create-only
+# or
+npm run migrate:dev:create
+```
+
+If you are happy with your database changes you want to deploy those changes to your [production database](https://www.prisma.io/blog/prisma-migrate-preview-b5eno5g08d0b#applying-migrations-in-production-and-other-environments). Use `prisma migrate deploy` to apply all pending migrations, can also be used in CI/CD pipelines as it works without prompts.
+
+```bash
+npx prisma migrate deploy
+# or
+npm run migrate:deploy
+```
+
+### 4. Prisma: Prisma Client JS
+
+[Prisma Client JS](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/api) is a type-safe database client auto-generated based on the data model.
+
+Generate Prisma Client JS by running
+
+> **Note**: Every time you update [schema.prisma](prisma/schema.prisma) re-generate Prisma Client JS
+
+```bash
+npx prisma generate
+# or
+npm run prisma:generate
+```
+
+### 5. Seed the database data with this script
+
+Execute the script with this command:
+
+```bash
+npm run seed
+```
+
+### 6. Start NestJS Server
+
+Run Nest Server in Development mode:
+
+```bash
+npm run start
 
 # watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev
 ```
 
-## Test
+Run Nest Server in Production mode:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-
-# compodoc
-$ npx @compodoc/compodoc -p tsconfig.json -s
+npm run start:prod
 ```
 
-## Links
+GraphQL Playground for the NestJS Server is available here: http://localhost:3000/graphql
+
+**[⬆ back to top](#overview)**
+
+## GraphQL Playground
+
+Open up the [example GraphQL queries](graphql/auth.graphql) and copy them to the GraphQL Playground. Some queries and mutations are secured by an auth guard. You have to acquire a JWT token from `signup` or `login`. Add the `accessToken`as followed to **HTTP HEADERS** in the playground and replace `YOURTOKEN` here:
+
+```json
+{
+  "Authorization": "Bearer YOURTOKEN"
+}
+```
+
+## Rest Api
+
+[RESTful API](http://localhost:3000/api) documentation available with Swagger.
+
+## Docker
+
+Nest server is a Node.js application and it is easily [dockerized](https://nodejs.org/de/docs/guides/nodejs-docker-webapp/).
+
+See the [Dockerfile](./Dockerfile) on how to build a Docker image of your Nest server.
+
+Now to build a Docker image of your own Nest server simply run:
 
 ```bash
-# Localhost backend :
-$ http://localhost/api
-
-# Swagger :
-$ http://localhost/swagger/
-
-# Compodoc
-$ http://127.0.0.1:8080/
+# give your docker image a name
+docker build -t <your username>/nest-prisma-server .
+# for example
+docker build -t nest-prisma-server .
 ```
 
-## Support
+After Docker build your docker image you are ready to start up a docker container running the nest server:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Table of Contents <!-- omit in toc -->
-
-- [General info](#general-info)
-- [Base Module APIs](#base-module-apis)
-- [Users Module APIs](#users-module-apis)
-
-  - [Auth via email flow](#auth-via-email-flow)
-  - [Auth via external services or social networks flow](#auth-via-external-services-or-social-networks-flow)
-
-- [Configure Auth](#configure-auth)
-
----
-
-## General info
-
-<!--### Auth via email flow-->
-
-This is a boilerplate that uses abstraction to create generic controller, service, dtos and entity, aiming to encapsulate the reusable logic throughout the project in one centralized base module.
-
-```
-Implementation logic :
-  The Category Module fully implements the base module.
-  The Product Module fully implements the base module and overrides the create method.
-  The Users Module does not extend the base module at all.
+```bash
+docker run -d -t -p 3000:3000 --env-file .env nest-prisma-server
 ```
 
-Here a picture that explains the concept a little bit more :
-<img alt="image" src="https://github.com/BrahimAbdelli/nestjs-boilerplate/blob/ff5002585763e1e0bf9a3d4f9b7b4f000d32320d/public/Abstraction2.png?raw=true">
+Now open up [localhost:3000](http://localhost:3000) to verify that your nest server is running.
 
-Below is the part in the article where you can find more infos.
-[More here](https://www.brahimabdelli.com/nestjs-boilerplate#Section%202%3A%20Implementation)
+When you run your NestJS application in a Docker container update your [.env](.env) file
 
-### Base Module APIs APIs
+```diff
+- DB_HOST=localhost
+# replace with name of the database container
++ DB_HOST=postgres
 
-Here we will be using basecontroller apis, implementend in the category and product module.
+# Prisma database connection
++ DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=prefer
+```
 
-Here you can read more about the controller APIs.
+If `DATABASE_URL` is missing in the root `.env` file, which is loaded into the Docker container, the NestJS application will exit with the following error:
 
-[More here about controller APIs](https://www.brahimabdelli.com/nestjs-boilerplate#Part%203%20-%20Explaining%20the%20base%20controller.)
+```bash
+(node:19) UnhandledPromiseRejectionWarning: Error: error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:3
+   |
+ 2 |   provider = "postgresql"
+ 3 |   url      = env("DATABASE_URL")
+```
 
-And here you can learn more about the written service methods.
+### Docker Compose
 
-[More about service methods](https://www.brahimabdelli.com/nestjs-boilerplate#Part%204%20-%20Explaining%20the%20base%20service.)
+You can also setup a the database and Nest application with the docker-compose
 
-### Create
+```bash
+# building new NestJS docker image
+docker-compose build
+# or
+npm run docker:build
 
-This API creates a new entity based on the provided data.
+# start docker-compose
+docker-compose up -d
+# or
+npm run docker
+```
 
-#### Request
+## Schema Development
 
-    POST : http://localhost:80/api/categories
+Update the Prisma schema `prisma/schema.prisma` and after that run the following two commands:
 
-#### Body
+```bash
+npx prisma generate
+# or in watch mode
+npx prisma generate --watch
+# or
+npm run prisma:generate
+npm run prisma:generate:watch
+```
 
-    {
-        "name": "Category 1",
-        "quantity": 90
+**[⬆ back to top](#overview)**
+
+## NestJS - Api Schema
+
+The [schema.graphql](./src/schema.graphql) is generated with [code first approach](https://docs.nestjs.com/graphql/quick-start#code-first) from the models, resolvers and input classes.
+
+You can use [class-validator](https://docs.nestjs.com/techniques/validation) to validate your inputs and arguments.
+
+### Resolver
+
+To implement the new query, a new resolver function needs to be added to `users.resolver.ts`.
+
+```ts
+@Query(returns => User)
+async getUser(@Args() args): Promise<User> {
+  return await this.prisma.client.user(args);
+}
+```
+
+Restart the NestJS server and this time the Query to fetch a `user` should work.
+
+**[⬆ back to top](#overview)**
+
+## GraphQL Client
+
+A GraphQL client is necessary to consume the GraphQL api provided by the NestJS Server.
+
+Checkout [Apollo](https://www.apollographql.com/) a popular GraphQL client which offers several clients for React, Angular, Vue.js, Native iOS, Native Android and more.
+
+### Angular
+
+#### Setup
+
+To start using [Apollo Angular](https://www.apollographql.com/docs/angular/basics/setup.html) simply run in an Angular and Ionic project:
+
+```bash
+ng add apollo-angular
+```
+
+`HttpLink` from apollo-angular requires the `HttpClient`. Therefore, you need to add the `HttpClientModule` to the `AppModule`:
+
+```ts
+imports: [BrowserModule,
+    HttpClientModule,
+    ...,
+    GraphQLModule],
+```
+
+You can also add the `GraphQLModule` in the `AppModule` to make `Apollo` available in your Angular App.
+
+You need to set the URL to the NestJS GraphQL Api. Open the file `src/app/graphql.module.ts` and update `uri`:
+
+```ts
+const uri = 'http://localhost:3000/graphql';
+```
+
+To use Apollo-Angular you can inject `private apollo: Apollo` into the constructor of a page, component or service.
+
+**[⬆ back to top](#overview)**
+
+#### Queries
+
+To execute a query you can use:
+
+```ts
+this.apollo.query({query: YOUR_QUERY});
+
+# or
+
+this.apollo.watchQuery({
+  query: YOUR_QUERY
+}).valueChanges;
+```
+
+Here is an example how to fetch your profile from the NestJS GraphQL Api:
+
+```ts
+const CurrentUserProfile = gql`
+  query CurrentUserProfile {
+    me {
+      id
+      email
+      name
     }
+  }
+`;
 
-#### Response
+@Component({
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
+})
+export class HomePage implements OnInit {
+  data: Observable<any>;
 
-    {
-        "_id": "64d3fc899409ef44287cf326",
-        "isDeleted": false,
-        "createdAt": "2023-08-09T20:52:25.106Z",
-        "lastUpdateAt": "2023-08-09T20:52:25.106Z",
-        "name": "Category 1",
-        "quantity": 90
+  constructor(private apollo: Apollo) {}
+
+  ngOnInit() {
+    this.data = this.apollo.watchQuery({
+      query: CurrentUserProfile,
+    }).valueChanges;
+  }
+}
+```
+
+Use the `AsyncPipe` and [SelectPipe](https://www.apollographql.com/docs/angular/basics/queries.html#select-pipe) to unwrap the data Observable in the template:
+
+```html
+<div *ngIf="data | async | select: 'me' as me">
+  <p>Me id: {{me.id}}</p>
+  <p>Me email: {{me.email}}</p>
+  <p>Me name: {{me.name}}</p>
+</div>
+```
+
+Or unwrap the data using [RxJs](https://www.apollographql.com/docs/angular/basics/queries.html#rxjs).
+
+This will end up in an `GraphQL error` because `Me` is protected by an `@UseGuards(GqlAuthGuard)` and requires an `Bearer TOKEN`.
+Please refer to the [Authentication](#authentication) section.
+
+**[⬆ back to top](#overview)**
+
+#### Mutations
+
+To execute a mutation you can use:
+
+```ts
+this.apollo.mutate({
+  mutation: YOUR_MUTATION,
+});
+```
+
+Here is an example how to login into your profile using the `login` Mutation:
+
+```ts
+const Login = gql`
+  mutation Login {
+    login(email: "test@example.com", password: "pizzaHawaii") {
+      token
+      user {
+        id
+        email
+        name
+      }
     }
+  }
+`;
 
-### Update
+@Component({
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
+})
+export class HomePage implements OnInit {
+  data: Observable<any>;
 
-The update API updates an existing entity based on the provided \_id and dto.
+  constructor(private apollo: Apollo) {}
 
-#### Request
+  ngOnInit() {
+    this.data = this.apollo.mutate({
+      mutation: Login,
+    });
+  }
+}
+```
 
-    PUT : http://localhost:80/api/categories/64bf9a457a37e42df4e0f7da
+**[⬆ back to top](#overview)**
 
-#### Body
+#### Subscriptions
 
-    {
-        "name": "Updated Category 1",
-        "quantity":80
-    }
+To execute a subscription you can use:
 
-#### Response
+```ts
+this.apollo.subscribe({
+  query: YOUR_SUBSCRIPTION_QUERY,
+});
+```
 
-    {
-        "_id": "64bf9a457a37e42df4e0f7da",
-        "isDeleted": false,
-        "createdAt": "2023-07-25T09:47:49.373Z",
-        "lastUpdateAt": "2023-08-09T22:08:35.721Z",
-        "name": "Updated Category 1",
-        "quantity": 80
-    }
+**[⬆ back to top](#overview)**
 
-### Get All
+#### Authentication
 
-Lists all the not logically deleted objects.
+To authenticate your requests you have to add your `TOKEN` you receive on `signup` and `login` [mutation](#mutations) to each request which is protected by the `@UseGuards(GqlAuthGuard)`.
 
-#### Request
+Because the apollo client is using `HttpClient` under the hood you are able to simply use an `Interceptor` to add your token to the requests.
 
-    GET : http://localhost:80/api/categories
+Create the following class:
 
-#### Body
+```ts
+import { Injectable } from '@angular/core';
+import {
+  HttpEvent,
+  HttpInterceptor,
+  HttpHandler,
+  HttpRequest,
+} from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-    {}
+@Injectable()
+export class TokenInterceptor implements HttpInterceptor {
+  constructor() {}
 
-#### Response
-
-    [
-        {
-            "_id": "6460f3f0e149c44cd0892edf",
-            "isDeleted": false,
-            "createdAt": "2023-05-14T14:45:04.802Z",
-            "lastUpdateAt": "2023-05-14T14:45:04.802Z",
-            "name": "Test Category",
-            "quantity": 9.99
+  intercept(
+    req: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<HttpEvent<any>> {
+    const token = 'YOUR_TOKEN'; // get from local storage
+    if (token !== undefined) {
+      req = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-            "_id": "6460f44d2a2c562aece3e016",
-            "isDeleted": false,
-            "createdAt": "2023-05-14T14:46:37.380Z",
-            "lastUpdateAt": "2023-05-14T14:46:37.380Z",
-            "name": "jhhh",
-            "quantity": 90
-        },
-        {
-            "_id": "64bf9a457a37e42df4e0f7da",
-            "isDeleted": false,
-            "createdAt": "2023-07-25T09:47:49.373Z",
-            "lastUpdateAt": "2023-08-09T22:08:35.721Z",
-            "name": "Updated Category 1",
-            "quantity": 80
-        },
-        {
-            "_id": "64bfd3f98269202f8419e348",
-            "isDeleted": false,
-            "createdAt": "2023-07-25T13:54:01.001Z",
-            "lastUpdateAt": "2023-07-25T13:54:01.001Z",
-            "name": "Category 1",
-            "quantity": 90
-        }
-    ]
-
-### Get By ID
-
-Returns an object based on the given \_id.
-
-#### Request
-
-    GET : http://localhost:80/api/categories/find/64bf9a457a37e42df4e0f7da
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "64bf9a457a37e42df4e0f7da",
-        "isDeleted": false,
-        "createdAt": "2023-07-25T09:47:49.373Z",
-        "lastUpdateAt": "2023-08-09T22:08:35.721Z",
-        "name": "Updated Category 1",
-        "quantity": 80
+      });
     }
 
-### Paginate
-
-The paginate API retrieves paginated entities from the database based on the given conditions.
-
-#### Request
-
-    GET : http://localhost:80/api/categories/paginate?take=2&skip=0
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "data": [
-            {
-                "_id": "6460f3f0e149c44cd0892edf",
-                "isDeleted": false,
-                "createdAt": "2023-05-14T14:45:04.802Z",
-                "lastUpdateAt": "2023-05-14T14:45:04.802Z",
-                "name": "Test Category",
-                "quantity": 9.99
-            },
-            {
-                "_id": "6460f3f0e149c44cd0892ee2",
-                "isDeleted": false,
-                "createdAt": "2023-05-14T14:45:04.865Z",
-                "lastUpdateAt": "2023-05-14T14:45:04.873Z",
-                "name": "Test Category",
-                "quantity": 9.99
-            }
-        ],
-        "count": 7
-    }
-
-### Archive
-
-This method applies logical deletion to an entity by updating the isDeleted property based on the provided \_id.
-
-#### Request
-
-    PATCH : http://localhost:80/api/categories/archive/6460f3f0e149c44cd0892ee0
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "6460f3f0e149c44cd0892ee0",
-        "isDeleted": true,
-        "createdAt": "2023-05-14T14:45:04.809Z",
-        "lastUpdateAt": "2023-08-09T22:15:24.611Z",
-        "name": "Updated Category",
-        "quantity": 19.99
-    }
-
-### Unarchive
-
-This method applies logical restoration to an entity by updating the isDeleted property based on the provided \_id.
-
-#### Request
-
-    PATCH : http://localhost:80/api/categories/unarchive/6460f3f0e149c44cd0892ee0
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "6460f3f0e149c44cd0892ee0",
-        "isDeleted": true,
-        "createdAt": "2023-05-14T14:45:04.809Z",
-        "lastUpdateAt": "2023-08-09T22:15:24.611Z",
-        "name": "Updated Category",
-        "quantity": 19.99
-    }
-
-### Delete
-
-This API deletes an entity from the database based on the provided \_id.
-
-#### Request
-
-    DELETE : http://localhost:80/api/categories/6460f3f0e149c44cd0892ede
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "6460f3f0e149c44cd0892ee0",
-        "isDeleted": true,
-        "createdAt": "2023-05-14T14:45:04.809Z",
-        "lastUpdateAt": "2023-08-09T22:15:24.611Z",
-        "name": "Updated Category",
-        "quantity": 19.99
-    }
-
-### Clear
-
-This method clears the table, in case the table exists.
-
-#### Request
-
-    DELETE : http://localhost:80/api/categories
-
-#### Body
-
-    {}
-
-#### Response
-
-    {}
-
-### Search
-
-This API constructs a search query object initially given by the client, and returns multiple values including objects, total page count, page and count.
-
-#### Request
-
-    GET : http://localhost:80/api/categories
-
-#### Body
-
-    {
-        "attributes": [
-
-            {
-                "key": "isDeleted",
-                "value": true,
-                "comparator": "EQUALS"
-            },
-            {
-                "key": "name",
-                "value": "c",
-                "comparator": "LIKE"
-            }
-        ],
-        "orders": {
-            "name": "ASC",
-            "quantity": "DESC"
-        },
-        "type": "OR",
-        "take": 3,
-        "skip": 0,
-        "isPaginable":true
-    }
-
-#### Response
-
-    {
-        "data": [
-            {
-                "_id": "6460f3f0e149c44cd0892ee0",
-                "isDeleted": true,
-                "createdAt": "2023-05-14T14:45:04.809Z",
-                "lastUpdateAt": "2023-08-09T22:15:24.611Z",
-                "name": "Updated Category",
-                "quantity": 19.99
-            }
-        ],
-        "count": 1,
-        "page": 0,
-        "totalPages": 1
-    }
-
-## Users Module APIs
-
-This module does not implement the abstraction module.
-
-Here you can read more about the users module
-
-[More here User Module](https://www.brahimabdelli.com/nestjs-boilerplate#Part%203%20-%20Creating%20our%20Users%20Module.)
-
-### Signup
-
-This API handles the signup request.
-
-#### Request
-
-    POST : http://localhost:80/api/users/signup
-
-#### Body
-
-    {
-        "email": "testable@test.tn",
-        "username": "testable",
-        "password": "testable"
-    }
-
-#### Response
-
-    {
-        "email": "testable@test.tn",
-        "username": "testable",
-        "password": "d3b...", //hashed password
-        "isDeleted": false,
-        "lastUpdateAt": "2023-08-09T22:58:06.911Z",
-        "createdAt": "2023-08-09T22:58:06.911Z",
-        "status": true,
-        "_id": "64d419fe4a5bf5400464b2e4"
-    }
-
-### Signin
-
-This API handles the signin request.
-
-#### Request
-
-    POST : http://localhost:80/api/users/login
-
-#### Body
-
-    {
-        "email": "testable@test.tn",
-        "password": "testable"
-    }
-
-#### Response
-
-    {
-        "_id": "64d419fe4a5bf5400464b2e4",
-        "isDeleted": false,
-        "createdAt": "2023-08-09T22:58:06.911Z",
-        "lastUpdateAt": "2023-08-09T22:58:06.911Z",
-        "email": "testable@test.tn",
-        "username": "testable",
-        "status": true,
-        "token": "eyJ..."//token
-    }
-
-### Get Users
-
-Lists all the not logically deleted users.
-
-This method will require a Bearer token
-
-#### Request
-
-    GET : http://localhost:80/api/users
-    Bearer Token : eyJ...
-
-#### Body
-
-    {}
-
-#### Response
-
-    [
-        {
-            "_id": "64bfa5397a37e42df4e0f7db",
-            "isDeleted": false,
-            "userCreated": {
-                "_id": "64bfa5397a37e42df4e0f7db",
-                "isDeleted": false,
-                "userCreated": "64bfa5397a37e42df4e0f7db",
-                "createdAt": "2023-07-25T10:34:33.843Z",
-                "userUpdated": "64bfa5397a37e42df4e0f7db",
-                "lastUpdateAt": "2023-07-25T13:05:19.500Z",
-                "email": "test@test.tn",
-                "password": "ad7...", //hashed
-                "username": "testt",
-                "status": true,
-                "tempPassword": "ad7...", //hashed password
-            },
-            "createdAt": "2023-07-25T10:34:33.843Z",
-            "userUpdated": {
-                "_id": "64bfa5397a37e42df4e0f7db",
-                "isDeleted": false,
-                "userCreated": "64bfa5397a37e42df4e0f7db",
-                "createdAt": "2023-07-25T10:34:33.843Z",
-                "userUpdated": "64bfa5397a37e42df4e0f7db",
-                "lastUpdateAt": "2023-07-25T13:05:19.500Z",
-                "email": "test@test.tn",
-                "password": "ad7...", //hashed password
-                "username": "testt",
-                "status": true,
-                "tempPassword": "ad7...", //hashed password
-            },
-            "lastUpdateAt": "2023-07-25T13:05:19.500Z",
-            "email": "test@test.tn",
-            "password": "d3b...", //hashed password
-            "username": "testt",
-            "status": true,
-            "tempPassword": "ad7...", //hashed password
-        },
-        {
-            "_id": "64d419fe4a5bf5400464b2e4",
-            "isDeleted": false,
-            "createdAt": "2023-08-09T22:58:06.911Z",
-            "lastUpdateAt": "2023-08-09T22:58:06.911Z",
-            "email": "testable@test.tn",
-            "password": "d3b...", //hashed password
-            "username": "testable",
-            "status": true,
-            "tempPassword": "d3b..." //hashed password
-        }
-    ]
-
-### Get By ID
-
-Returns an object based on the given \_id.
-
-#### Request
-
-    GET : http://localhost:80/api/users/user/64bf9a457a37e42df4e0f7da
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "64d7addea1d91514a4ebcbb9",
-        "isDeleted": false,
-        "createdAt": "2023-08-12T16:05:50.201Z",
-        "lastUpdateAt": "2023-08-12T16:05:50.201Z",
-        "email": "testable@testt.tn",
-        "password": "d3b...", //hashed password
-        "username": "testtable",
-        "status": true,
-        "tempPassword": "d3b..." //hashed password
-    }
-
-### Get By Username
-
-Returns a user based on the given username.
-
-#### Request
-
-    GET : http://localhost:80/api/users/username/testtable
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "64d7addea1d91514a4ebcbb9",
-        "isDeleted": false,
-        "createdAt": "2023-08-12T16:05:50.201Z",
-        "lastUpdateAt": "2023-08-12T16:05:50.201Z",
-        "email": "testable@testt.tn",
-        "password": "d3b...", //hashed password
-        "username": "testtable",
-        "status": true,
-        "tempPassword": "d3b..." //hashed password
-    }
-
-### Get By Email
-
-Returns an object based on the given \_id.
-
-#### Request
-
-    GET : http://localhost:80/api/users/email/testable@testt.tn
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "64d7addea1d91514a4ebcbb9",
-        "isDeleted": false,
-        "createdAt": "2023-08-12T16:05:50.201Z",
-        "lastUpdateAt": "2023-08-12T16:05:50.201Z",
-        "email": "testable@testt.tn",
-        "password": "d3b...", //hashed password
-        "username": "testtable",
-        "status": true,
-        "tempPassword": "d3b..." //hashed password
-    }
-
-### Forgot Password
-
-This API sends a reset password email.
-
-#### Request
-
-    POST : http://localhost:80/api/users/forgot-password/test@test.com
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "6457bfdd35b8602ae499bde4",
-        "isDeleted": false,
-        "createdAt": "2023-05-07T15:12:29.009Z",
-        "userUpdated": "6457bfdd35b8602ae499bde4",
-        "lastUpdateAt": "2023-08-26T20:44:40.933Z",
-        "email": "test@test.tn",
-        "password": "0e8...", //hashed password
-        "username": "testing",
-        "status": false
-    }
-
-### Reset Password
-
-Reset password API.
-
-#### Request
-
-    POST : http://localhost:80/api/users/reset-password
-
-#### Body
-
-    {
-        "token": "eyJ...",
-        "password": "testing"
-    }
-
-#### Response
-
-    {
-        "_id": "6457bfdd35b8602ae499bde4",
-        "email": "test@test.tn",
-        "password": "d3b...", //hashed password
-        "username": "testing",
-        resetPasswordToken?: "";
-    }
-
-### Create
-
-The update API updates an existing entity based on the provided \_id and dto.
-
-#### Request
-
-    POST : http://localhost:80/api/users
-
-#### Body
-
-    {
-        "username": "testing",
-        "email": "testing@gmail.com",
-        "password":"testing"
-    }
-
-#### Response
-
-    {
-        "_id": "6457bfdd35b8602ae499bde4",
-        "isDeleted": false,
-        "createdAt": "2023-05-07T15:12:29.009Z",
-        "userUpdated": "6457bfdd35b8602ae499bde4",
-        "lastUpdateAt": "2023-08-26T21:21:59.777Z",
-        "email": "brahim.abdelli994@gmail.com",
-        "password": "0e8...",
-        "username": "testing"
-    }
-
-### Update
-
-The update API updates an existing entity based on the provided \_id and dto.
-
-#### Request
-
-    PUT : http://localhost:80/api/users/64bf9a457a37e42df4e0f7da
-
-#### Body
-
-    {
-        "username": "testing",
-        "email": "testing@gmail.com",
-        "password":"test"
-    }
-
-#### Response
-
-    {
-        "_id": "6457bfdd35b8602ae499bde4",
-        "isDeleted": false,
-        "createdAt": "2023-05-07T15:12:29.009Z",
-        "userUpdated": "6457bfdd35b8602ae499bde4",
-        "lastUpdateAt": "2023-08-26T21:21:59.777Z",
-        "email": "brahim.abdelli994@gmail.com",
-        "password": "0e8...",
-        "username": "testing"
-    }
-
-### Archive
-
-This method applies logical deletion to an entity by updating the isDeleted property based on the provided \_id.
-
-#### Request
-
-    PATCH : http://localhost:80/api/users/archive/6460f3f0e149c44cd0892ee0
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "6457bfdd35b8602ae499bde4",
-        "isDeleted": true,
-        "createdAt": "2023-05-07T15:12:29.009Z",
-        "userUpdated": "6457bfdd35b8602ae499bde4",
-        "lastUpdateAt": "2023-08-26T21:21:59.777Z",
-        "email": "brahim.abdelli994@gmail.com",
-        "password": "0e8...",
-        "username": "testing",
-        "status": false
-    }
-
-### Unarchive
-
-This method applies logical restoration to an entity by updating the isDeleted property based on the provided \_id.
-
-#### Request
-
-    PATCH : http://localhost:80/api/users/unarchive/6460f3f0e149c44cd0892ee0
-
-#### Body
-
-    {}
-
-#### Response
-
-    {
-        "_id": "6457bfdd35b8602ae499bde4",
-        "isDeleted": false,
-        "createdAt": "2023-05-07T15:12:29.009Z",
-        "userUpdated": "6457bfdd35b8602ae499bde4",
-        "lastUpdateAt": "2023-08-26T21:21:59.777Z",
-        "email": "brahim.abdelli994@gmail.com",
-        "password": "0e8...",
-        "username": "testing",
-        "status": true
-    }
-
-### Clear
-
-This method clears the table, in case the table exists.
-
-#### Request
-
-    DELETE : http://localhost:80/api/users
-
-#### Body
-
-    {}
-
-#### Response
-
-    {}
+    return next.handle(req);
+  }
+}
+```
+
+Add the Interceptor to the `AppModule` providers like this:
+
+```ts
+providers: [
+    ...
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+    ...
+  ]
+```
+
+After you configured the Interceptor and retrieved the `TOKEN` from storage your request will succeed on resolvers with `@UseGuards(GqlAuthGuard)`.
+
+**[⬆ back to top](#overview)**
