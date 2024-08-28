@@ -3,27 +3,24 @@ services:
   prisma-migrate:
     container_name: prisma-migrate
     build:
-      context: .
+      context: prisma
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
-      - mongodb
-    env_file:
-      - .env
+      - postgres
 
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
+  postgres:
+    image: postgres:15
+    container_name: postgres
     restart: always
     ports:
-      - '27017:27017'
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      - '5432:5432'
+    env_file:
+      - .env
     volumes:
-      - mongodb_data:/data/db
+      - postgres:/var/lib/postgresql/data
 
 volumes:
-  mongodb_data:
-    name: mongo-data
+  postgres:
+    name: nest-db

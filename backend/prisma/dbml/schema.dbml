@@ -1,0 +1,243 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table IncomeMoney {
+  id String [pk]
+  amount Float [not null]
+  MessageInputId String
+  messageInput MessageInput
+  inputType InputType [not null, default: 'FROM_Message']
+  spendingDate DateTime [default: `now()`, not null]
+  category Category [not null]
+  status Status [not null, default: 'ACTIVE']
+  description String
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String [not null]
+  createdUser User [not null]
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+}
+
+Table MessageInput {
+  id String [pk]
+  message String [not null]
+  sourceIncomeId String [not null]
+  sourceIncome SourceIncome [not null]
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String [not null]
+  createdUser User [not null]
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+  MessageOutput MessageOutput [not null]
+  IncomeMoney IncomeMoney [not null]
+}
+
+Table MessageOutput {
+  id String [pk]
+  message String [not null]
+  messageInputId String [not null]
+  messageInput MessageInput [not null]
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String [not null]
+  createdUser User [not null]
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+}
+
+Table SourceIncome {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String [not null]
+  createdUser User [not null]
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+  MessageInput MessageInput [not null]
+  SourcePromtHandler SourcePromtHandler [not null]
+}
+
+Table Prompt {
+  id String [pk]
+  name String [unique, not null]
+  PrompType PrompType [not null]
+  Regex String
+  description String
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String [not null]
+  createdUser User [not null]
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+  SourcePromtHandler SourcePromtHandler [not null]
+}
+
+Table SourcePromtHandler {
+  promptId String [not null]
+  prompt Prompt [not null]
+  sourceIncomeId String [not null]
+  sourceIncome SourceIncome [not null]
+
+  indexes {
+    (promptId, sourceIncomeId) [pk]
+  }
+}
+
+Table User {
+  id String [pk]
+  email String [unique, not null]
+  password String [not null]
+  firstname String
+  lastname String
+  roleId String
+  role Role
+  messages MessageInput [not null]
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+  MessageOutput MessageOutput [not null]
+  IncomeMoney IncomeMoney [not null]
+  SourceIncome SourceIncome [not null]
+  Prompt Prompt [not null]
+}
+
+Table Role {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  users User [not null]
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+  RolePermission RolePermission [not null]
+}
+
+Table Permission {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+  RolePermission RolePermission [not null]
+  PermissionFunction PermissionFunction [not null]
+}
+
+Table Function {
+  id String [pk]
+  name String [unique, not null]
+  customName String
+  description String
+  link String
+  status Status [not null, default: 'ACTIVE']
+  parentId String
+  parent Function
+  children Function [not null]
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String
+  updatedAt DateTime [not null]
+  updatedBy String
+  deletedAt DateTime
+  deletedBy String
+  PermissionFunction PermissionFunction [not null]
+}
+
+Table RolePermission {
+  roleId String [not null]
+  role Role [not null]
+  permissionId String [not null]
+  permission Permission [not null]
+
+  indexes {
+    (roleId, permissionId) [pk]
+  }
+}
+
+Table PermissionFunction {
+  permissionId String [not null]
+  permission Permission [not null]
+  functionId String [not null]
+  function Function [not null]
+
+  indexes {
+    (permissionId, functionId) [pk]
+  }
+}
+
+Enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+Enum PrompType {
+  PROMPT_1
+  PROMPT_2
+  PROMPT_3
+  PROMPT_4
+}
+
+Enum InputType {
+  FROM_Message
+  FROM_Manual
+}
+
+Enum Category {
+  RETAURANT
+  SHOPPING
+  ENTERTAINMENT
+  TRANSPORTATION
+  HEALTH
+  EDUCATION
+  OTHER
+}
+
+Ref: IncomeMoney.MessageInputId > MessageInput.id
+
+Ref: IncomeMoney.createdBy > User.id
+
+Ref: MessageInput.sourceIncomeId > SourceIncome.id
+
+Ref: MessageInput.createdBy > User.id
+
+Ref: MessageOutput.messageInputId > MessageInput.id
+
+Ref: MessageOutput.createdBy > User.id
+
+Ref: SourceIncome.createdBy > User.id
+
+Ref: Prompt.createdBy > User.id
+
+Ref: SourcePromtHandler.promptId > Prompt.id
+
+Ref: SourcePromtHandler.sourceIncomeId > SourceIncome.id
+
+Ref: User.roleId > Role.id
+
+Ref: Function.parentId - Function.id [delete: No Action]
+
+Ref: RolePermission.roleId > Role.id
+
+Ref: RolePermission.permissionId > Permission.id
+
+Ref: PermissionFunction.permissionId > Permission.id
+
+Ref: PermissionFunction.functionId > Function.id

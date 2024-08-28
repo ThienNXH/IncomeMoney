@@ -1,0 +1,26 @@
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum PrompType {
+  PROMPT_1
+  PROMPT_2
+  PROMPT_3
+  PROMPT_4
+}
+
+enum InputType {
+  FROM_Message
+  FROM_Manual
+}
+
+enum Category {
+  RETAURANT
+  SHOPPING
+  ENTERTAINMENT
+  TRANSPORTATION
+  HEALTH
+  EDUCATION
+  OTHER
+}

@@ -1,0 +1,13 @@
+model MessageOutput {
+  id             String       @id @default(uuid()) @db.Uuid
+  message        String
+  messageInputId String       @db.Uuid
+  messageInput   MessageInput @relation(fields: [messageInputId], references: [id])
+  createdAt      DateTime     @default(now())
+  createdBy      String       @db.Uuid
+  createdUser    User         @relation(fields: [createdBy], references: [id])
+  updatedAt      DateTime     @updatedAt
+  updatedBy      String?
+  deletedAt      DateTime?
+  deletedBy      String?
+}

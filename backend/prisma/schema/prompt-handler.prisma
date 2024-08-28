@@ -1,0 +1,39 @@
+model SourceIncome {
+  id                 String               @id @default(uuid()) @db.Uuid
+  name               String               @unique //Bank name, card name, etc
+  description        String?
+  createdAt          DateTime             @default(now())
+  createdBy          String               @db.Uuid
+  createdUser        User                 @relation(fields: [createdBy], references: [id])
+  updatedAt          DateTime             @updatedAt
+  updatedBy          String?
+  deletedAt          DateTime?
+  deletedBy          String?
+  MessageInput       MessageInput[]
+  SourcePromtHandler SourcePromtHandler[]
+}
+
+model Prompt {
+  id                 String               @id @default(uuid()) @db.Uuid
+  name               String               @unique
+  PrompType          PrompType
+  Regex              String?
+  description        String?
+  createdAt          DateTime             @default(now())
+  createdBy          String               @db.Uuid
+  createdUser        User                 @relation(fields: [createdBy], references: [id])
+  updatedAt          DateTime             @updatedAt
+  updatedBy          String?
+  deletedAt          DateTime?
+  deletedBy          String?
+  SourcePromtHandler SourcePromtHandler[]
+}
+
+model SourcePromtHandler {
+  promptId       String       @db.Uuid
+  prompt         Prompt       @relation(fields: [promptId], references: [id])
+  sourceIncomeId String       @db.Uuid
+  sourceIncome   SourceIncome @relation(fields: [sourceIncomeId], references: [id])
+
+  @@id([promptId, sourceIncomeId])
+}
